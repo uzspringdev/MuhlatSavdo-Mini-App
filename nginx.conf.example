@@ -1,0 +1,69 @@
+server {
+    listen 80;
+    server_name mini.muhlatsavdo.uz;
+
+    # Redirect to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name mini.muhlatsavdo.uz;
+
+    # SSL configuration
+    ssl_certificate /etc/letsencrypt/live/mini.muhlatsavdo.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mini.muhlatsavdo.uz/privkey.pem;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:MozSSL:10m;
+    ssl_session_tickets off;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+
+    # Application root
+    root /var/www/mini.muhlatsavdo.uz/dist;
+    index index.html;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    # Content Security Policy (Adjust based on external resources)
+    add_header Content-Security-Policy "default-src 'self' https://api.muhlatsavdo.uz wss://api.muhlatsavdo.uz https://telegram.org; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://api.muhlatsavdo.uz https://t.me;" always;
+
+    # Compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 10240;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml application/javascript;
+    gzip_disable "MSIE [1-6]\.";
+
+    # Logging
+    access_log /var/log/nginx/mini.muhlatsavdo.access.log;
+    error_log /var/log/nginx/mini.muhlatsavdo.error.log;
+
+    # API Proxy (optional if CORS is fully handled, but good for avoiding CORS issues)
+    # If using proxy in Vite for prod, uncomment this
+    # location /api/ {
+    #     proxy_pass https://api.muhlatsavdo.uz/api/;
+    #     proxy_http_version 1.1;
+    #     proxy_set_header Upgrade $http_upgrade;
+    #     proxy_set_header Connection 'upgrade';
+    #     proxy_set_header Host $host;
+    #     proxy_cache_bypass $http_upgrade;
+    # }
+
+    # SPA Routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Static assets caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2|woff|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        access_log off;
+    }
+}
