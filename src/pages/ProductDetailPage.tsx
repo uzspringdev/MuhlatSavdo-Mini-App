@@ -309,7 +309,6 @@ export default function ProductDetailPage() {
             instalments={product.instalments}
             selectedIndex={instalmentIdx}
             onSelect={setInstalmentIdx}
-            basePrice={product.basePrice}
             currency={product.currency}
           />
         )}

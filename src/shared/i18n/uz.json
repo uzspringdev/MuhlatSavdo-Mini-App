@@ -1,6 +1,5 @@
 {
   "common.back": "Orqaga",
-  "common.next": "Keyingisi",
   "common.clear": "Tozalash",
   "common.loading": "Yuklanmoqda...",
   "common.imageN": "{n}-rasm",
@@ -56,7 +55,6 @@
   "product.cheapestFrom": "{price}/oydan",
   "product.instalmentSummary": "{months} oy · jami {total}",
   "product.payToday": "Bugun to'lanadi: {price}",
-  "product.overpayment": "Ortiqcha to'lov: {amount} ({percent})",
   "product.viewSchedule": "To'lov jadvalini ko'rish",
   "product.scheduleTitle": "To'lov jadvali",
   "product.paymentN": "{n}-to'lov",

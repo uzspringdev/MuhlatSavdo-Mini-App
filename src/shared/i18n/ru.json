@@ -1,6 +1,5 @@
 {
   "common.back": "Назад",
-  "common.next": "Далее",
   "common.clear": "Очистить",
   "common.loading": "Загрузка...",
   "common.imageN": "Фото {n}",
@@ -56,7 +55,6 @@
   "product.cheapestFrom": "от {price}/мес",
   "product.instalmentSummary": "{months} мес · всего {total}",
   "product.payToday": "Сегодня к оплате: {price}",
-  "product.overpayment": "Переплата: {amount} ({percent})",
   "product.viewSchedule": "Посмотреть график платежей",
   "product.scheduleTitle": "График платежей",
   "product.paymentN": "Платёж {n}",

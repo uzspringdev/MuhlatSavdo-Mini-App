@@ -3,14 +3,13 @@ import { X } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { Instalment } from '@/shared/types';
 import { formatPrice } from '@/shared/utils';
-import { getMonthlyPayment, getOverpayment, buildPaymentSchedule } from '@/shared/utils/instalment';
+import { getMonthlyPayment, buildPaymentSchedule } from '@/shared/utils/instalment';
 import { useT, useLangStore, type Lang } from '@/shared/i18n';
 
 interface InstalmentCalculatorProps {
   instalments: Instalment[];
   selectedIndex: number;
   onSelect: (index: number) => void;
-  basePrice: number;
   currency: 'UZS' | 'USD' | 'RUB';
 }
 
@@ -23,7 +22,6 @@ export function InstalmentCalculator({
   instalments,
   selectedIndex,
   onSelect,
-  basePrice,
   currency,
 }: InstalmentCalculatorProps) {
   const t = useT();
@@ -32,7 +30,6 @@ export function InstalmentCalculator({
 
   const selected = instalments[selectedIndex];
   const monthly = useMemo(() => getMonthlyPayment(selected), [selected]);
-  const overpayment = useMemo(() => getOverpayment(selected, basePrice), [selected, basePrice]);
   const schedule = useMemo(() => buildPaymentSchedule(selected), [selected]);
 
   if (!selected) return null;
@@ -76,15 +73,6 @@ export function InstalmentCalculator({
             total: formatPrice(selected.price, currency, lang),
           })}
         </p>
-        {overpayment.amount > 0 && (
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">
-            {t('product.overpayment', {
-              amount: `+${formatPrice(overpayment.amount, currency, lang)}`,
-              percent: `+${Math.round(overpayment.percent)}%`,
-            })}
-          </p>
-        )}
-
         <button
           onClick={() => setShowSchedule(true)}
           className="w-full min-h-[44px] mt-1 text-xs font-bold text-di-red uppercase tracking-wider underline underline-offset-2"
