@@ -7,10 +7,11 @@ export function isRealUzPhone(phone?: string | null): boolean {
   return !!phone && /^\+998\d{9}$/.test(phone);
 }
 
-/** Format price with currency */
+/** Format price with currency. `lang` only affects the UZS unit label ("сум" vs "so'm"). */
 export function formatPrice(
   price: number,
   currency: 'UZS' | 'USD' | 'RUB' = 'UZS',
+  lang: 'ru' | 'uz' = 'ru',
 ): string {
   if (currency === 'USD') {
     return `$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
@@ -19,7 +20,8 @@ export function formatPrice(
     return `${price.toLocaleString('ru-RU')} ₽`;
   }
   // UZS
-  return `${price.toLocaleString('uz-UZ')} сум`;
+  const unit = lang === 'uz' ? "so'm" : 'сум';
+  return `${price.toLocaleString('uz-UZ')} ${unit}`;
 }
 
 /** Truncate text to n chars */
@@ -81,26 +83,19 @@ export function getProductPriceInfo(product: ProductDto) {
   };
 }
 
-/**
- * Instalment.price backenddan JAMI (umumiy) narx sifatida keladi, oylik to'lov emas.
- * Masalan: { price: 1400, months: 10 } => 1400$ jami, ya'ni 140$/oy.
- */
 import type { Instalment } from '@/shared/types';
-
-export function getMonthlyInstalmentPrice(instalment: Instalment): number {
-  if (!instalment.months) return instalment.price;
-  return instalment.price / instalment.months;
-}
+import { getMonthlyPayment } from '@/shared/utils/instalment';
 
 /** Barcha muddatlar orasidan eng arzon oylik to'lovni beruvchi variantni topadi ("dan" belgisi uchun) */
 export function getCheapestInstalment(instalments?: Instalment[]): Instalment | undefined {
   if (!instalments || instalments.length === 0) return undefined;
   return instalments.reduce((cheapest, current) =>
-    getMonthlyInstalmentPrice(current) < getMonthlyInstalmentPrice(cheapest) ? current : cheapest,
+    getMonthlyPayment(current) < getMonthlyPayment(cheapest) ? current : cheapest,
   );
 }
 
 /** Debounce helper */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- unknown[] breaks call-site inference for narrower function signatures
 export function debounce<T extends (...args: any[]) => void>(
   fn: T,
   delay: number,

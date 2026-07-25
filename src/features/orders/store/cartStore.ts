@@ -8,6 +8,8 @@ interface CartState {
   addItem: (product: ProductDto, quantity?: number, instalmentMonths?: number) => void;
   removeItem: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
+  /** `months` undefined switches the item back to a cash purchase */
+  updateInstalment: (productId: number, months?: number) => void;
   clearCart: () => void;
   totalItems: () => number;
   totalPrice: () => number;
@@ -53,6 +55,14 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((i) =>
             i.productId === productId ? { ...i, quantity } : i,
+          ),
+        }));
+      },
+
+      updateInstalment: (productId, months) => {
+        set((state) => ({
+          items: state.items.map((i) =>
+            i.productId === productId ? { ...i, selectedInstalmentMonths: months } : i,
           ),
         }));
       },

@@ -308,6 +308,8 @@ export interface TelegramWebApp {
   isExpanded: boolean;
   viewportHeight: number;
   viewportStableHeight: number;
+  safeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
   MainButton: TelegramMainButton;
   BackButton: TelegramBackButton;
   HapticFeedback: TelegramHapticFeedback;
@@ -316,6 +318,11 @@ export interface TelegramWebApp {
   ready(): void;
   enableClosingConfirmation(): void;
   disableClosingConfirmation(): void;
+  disableVerticalSwipes?(): void;
+  enableVerticalSwipes?(): void;
+  showAlert?(message: string, callback?: () => void): void;
+  onEvent(eventType: string, callback: () => void): void;
+  offEvent(eventType: string, callback: () => void): void;
   sendData(data: string): void;
   openLink(url: string): void;
   openTelegramLink(url: string): void;

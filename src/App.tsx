@@ -6,6 +6,8 @@ import { useTelegramTheme } from '@/shared/hooks/useTelegramTheme';
 import { useTelegramAuth } from '@/features/auth/hooks/useAuth';
 import { telegram } from '@/app/telegram/telegram';
 import { ToastContainer } from '@/shared/ui/ToastContainer';
+import { HomeSkeleton } from '@/shared/ui/HomeSkeleton';
+import { useCartStore } from '@/features/orders/store/cartStore';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +32,10 @@ function AppContent() {
     telegram.expand();
     telegram.ready();
 
+    // Prevent the pull-down-to-close gesture from accidentally exiting the
+    // Mini App while the user scrolls a product list.
+    telegram.disableVerticalSwipes();
+
     // Disable overscroll bounce
     document.body.style.overscrollBehavior = 'none';
     document.documentElement.style.overscrollBehavior = 'none';
@@ -42,17 +48,19 @@ function AppContent() {
     }
   }, []);
 
+  // Ask for confirmation before closing while the cart isn't empty, so a stray
+  // swipe/back-gesture doesn't silently drop items the user meant to buy.
+  const totalCartItems = useCartStore((s) => s.totalItems());
+  useEffect(() => {
+    if (totalCartItems > 0) {
+      telegram.enableClosingConfirmation();
+    } else {
+      telegram.disableClosingConfirmation();
+    }
+  }, [totalCartItems]);
+
   if (!booted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-di-red to-red-700 flex items-center justify-center shadow-xl shadow-di-red/30">
-            <span className="text-2xl font-black text-white">MS</span>
-          </div>
-          <div className="w-6 h-6 border-3 border-di-red border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   return (

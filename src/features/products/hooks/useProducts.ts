@@ -83,6 +83,43 @@ export function useProductsByCategory(categoryId: number, page = 0) {
   });
 }
 
+export function useInfiniteProductSearch(
+  criteria: ProductSearchCriteria,
+  size = 10,
+  options?: { enabled?: boolean },
+) {
+  return useInfiniteQuery({
+    queryKey: [...productKeys.search(criteria), 'infinite', size],
+    queryFn: ({ pageParam = 0 }) => productService.search(criteria, pageParam, size),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.last || lastPage.content.length < size) {
+        return undefined;
+      }
+      return allPages.length;
+    },
+    enabled: options?.enabled ?? true,
+  });
+}
+
+export function useBrandsByCategory(categoryId: number) {
+  return useQuery({
+    queryKey: [...productKeys.all, 'brands', categoryId],
+    queryFn: () => productService.getBrandsByCategory(categoryId),
+    enabled: !!categoryId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useColorsByCategory(categoryId: number) {
+  return useQuery({
+    queryKey: [...productKeys.all, 'colors', categoryId],
+    queryFn: () => productService.getColorsByCategoryId(categoryId),
+    enabled: !!categoryId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useInfiniteProductsByCategory(categoryId: number, size = 12) {
   return useInfiniteQuery({
     queryKey: [...productKeys.byCategory(categoryId), 'infinite', size],

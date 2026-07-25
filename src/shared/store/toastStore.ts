@@ -29,3 +29,10 @@ export const useToastStore = create<ToastState>()((set) => ({
     set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
   },
 }));
+
+/** Imperative toast helpers usable outside React render (event handlers, catch blocks) */
+export const toast = {
+  success: (message: string) => useToastStore.getState().show(message, 'success'),
+  error: (message: string) => useToastStore.getState().show(message, 'error'),
+  info: (message: string) => useToastStore.getState().show(message, 'info'),
+};

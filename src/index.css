@@ -1,7 +1,12 @@
-/* ─── Google Fonts ──────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
+/* Google Fonts is loaded from index.html via <link rel="preconnect"> + <link
+   rel="stylesheet"> instead of an @import here — @import blocks the CSSOM
+   until the remote stylesheet resolves, delaying every other style on the
+   page behind it. */
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ─── Dark mode: Telegram temasi (.dark klassi) boshqaradi, OS prefers-color-scheme emas ── */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ─── Muhlat Savdo Design System ────────────────────────────────────────────── */
 @theme {
@@ -17,6 +22,24 @@
   --color-tg-text: var(--tg-text, #000000);
   --color-tg-button: var(--tg-button, #e31e24);
   --color-tg-button-text: var(--tg-button-text, #ffffff);
+
+  /* ─── Typography scale (PLAN.md B1-1) — replaces ad-hoc text-[10px] etc. ── */
+  --text-caption: 11px;
+  --text-caption--line-height: 1.4;
+  --text-body: 13px;
+  --text-body--line-height: 1.5;
+  --text-base: 15px;
+  --text-base--line-height: 1.5;
+  --text-lg: 17px;
+  --text-lg--line-height: 1.5;
+  --text-xl: 22px;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 28px;
+  --text-2xl--line-height: 1.2;
+
+  /* ─── Radius scale (PLAN.md B1-3) — two levels instead of five ad-hoc ones ── */
+  --radius-el: 12px;
+  --radius-card: 20px;
 }
 
 /* ─── Base resets ────────────────────────────────────────────────────────────── */
@@ -38,12 +61,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
-  /* Prevent text selection during swipe */
-  -webkit-user-select: none;
-  user-select: none;
   /* Telegram safe area */
   padding-top: env(safe-area-inset-top, 0);
   padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* ─── Text selection ─────────────────────────────────────────────────────────
+   Only interactive controls suppress selection (prevents accidental text
+   selection during a tap/swipe on a button). Product names and prices stay
+   selectable — people copy them to share with friends. */
+button, nav, [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ─── Safe area utilities ────────────────────────────────────────────────────── */
@@ -139,4 +168,94 @@ body {
 /* ─── Smooth transitions ─────────────────────────────────────────────────────── */
 a, button {
   transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* ─── Focus visibility (keyboard navigation) ─────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-di-red);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Dual-thumb price range slider (FilterSheet) ────────────────────────────
+   Two overlapping native <input type="range"> elements share one track; only
+   each thumb is interactive (pointer-events re-enabled on ::-webkit/moz-range-thumb)
+   so both ends can be dragged independently without a JS drag implementation. */
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.range-slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  background: transparent;
+}
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--color-di-red);
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.range-slider::-moz-range-track {
+  background: transparent;
+}
+.range-slider::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--color-di-red);
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+/* ─── Micro-animations ────────────────────────────────────────────────────────
+   All disabled under prefers-reduced-motion — see the media query at the
+   bottom of this block, which strips every animation defined here at once. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-page-in {
+  animation: page-in 0.25s ease-out;
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-badge-pop {
+  animation: badge-pop 0.3s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in,
+  .animate-badge-pop {
+    animation: none;
+  }
 }

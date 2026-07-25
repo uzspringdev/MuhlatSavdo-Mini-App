@@ -1,7 +1,8 @@
 import { type ReactNode } from 'react';
-import { PackageOpen, Search, ShoppingBag, Frown } from 'lucide-react';
+import { PackageOpen, Search, ShoppingBag, Frown, Heart } from 'lucide-react';
+import { useT } from '@/shared/i18n';
 
-type EmptyVariant = 'products' | 'search' | 'cart' | 'generic';
+type EmptyVariant = 'products' | 'search' | 'cart' | 'generic' | 'favorites';
 
 interface EmptyStateProps {
   variant?: EmptyVariant;
@@ -10,30 +11,36 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-const VARIANTS: Record<EmptyVariant, { icon: ReactNode; title: string; desc: string }> = {
+const VARIANTS: Record<EmptyVariant, { icon: ReactNode; titleKey: string; descKey: string }> = {
   products: {
     icon: <PackageOpen className="w-12 h-12 text-neutral-400" />,
-    title: 'Товары не найдены',
-    desc: 'В этой категории пока нет товаров',
+    titleKey: 'empty.productsTitle',
+    descKey: 'empty.productsDesc',
   },
   search: {
     icon: <Search className="w-12 h-12 text-neutral-400" />,
-    title: 'Ничего не найдено',
-    desc: 'Попробуйте изменить поисковый запрос',
+    titleKey: 'empty.searchTitle',
+    descKey: 'empty.searchDesc',
   },
   cart: {
     icon: <ShoppingBag className="w-12 h-12 text-neutral-400" />,
-    title: 'Корзина пуста',
-    desc: 'Добавьте товары, чтобы оформить заказ',
+    titleKey: 'empty.cartTitle',
+    descKey: 'empty.cartDesc',
   },
   generic: {
     icon: <Frown className="w-12 h-12 text-neutral-400" />,
-    title: 'Нет данных',
-    desc: 'Попробуйте обновить страницу',
+    titleKey: 'empty.genericTitle',
+    descKey: 'empty.genericDesc',
+  },
+  favorites: {
+    icon: <Heart className="w-12 h-12 text-neutral-400" />,
+    titleKey: 'empty.favoritesTitle',
+    descKey: 'empty.favoritesDesc',
   },
 };
 
 export function EmptyState({ variant = 'generic', title, description, action }: EmptyStateProps) {
+  const t = useT();
   const v = VARIANTS[variant];
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-4">
@@ -42,10 +49,10 @@ export function EmptyState({ variant = 'generic', title, description, action }: 
       </div>
       <div className="space-y-1">
         <h3 className="text-base font-semibold text-neutral-800 dark:text-neutral-100">
-          {title ?? v.title}
+          {title ?? t(v.titleKey)}
         </h3>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          {description ?? v.desc}
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          {description ?? t(v.descKey)}
         </p>
       </div>
       {action && <div>{action}</div>}

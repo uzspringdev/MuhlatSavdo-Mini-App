@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { clsx } from 'clsx';
 import type { CategoryDto } from '@/shared/types';
 import { resolveImage } from '@/shared/utils';
@@ -9,6 +10,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, isActive, onClick }: CategoryCardProps) {
+  const [imgFailed, setImgFailed] = useState(false);
   const imageUrl = category.imageUrl || category.iconUrl || category.image?.url || category.image?.name || category.icon?.url || category.icon?.name;
 
   return (
@@ -24,11 +26,15 @@ export function CategoryCard({ category, isActive, onClick }: CategoryCardProps)
       {/* Inner framed image — a small gap from the card edge keeps busy photos
           from feeling zoomed-in/cropped-too-tight against the tile bounds */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl">
-        {imageUrl ? (
+        {imageUrl && !imgFailed ? (
           <img
             src={resolveImage(imageUrl)}
             alt={category.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            width={300}
+            height={300}
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+            className="h-full w-full object-cover transition-transform duration-500 group-active:scale-110"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-neutral-100 dark:bg-neutral-700">

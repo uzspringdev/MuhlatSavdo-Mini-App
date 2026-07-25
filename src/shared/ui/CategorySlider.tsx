@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { clsx } from 'clsx';
 import type { CategoryDto } from '@/shared/types';
@@ -17,6 +17,7 @@ export function CategorySlider({
   onSelect,
 }: CategorySliderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [failedIds, setFailedIds] = useState<Set<number>>(new Set());
 
   const handleClick = (cat: CategoryDto) => {
     telegram.haptic.selection();
@@ -50,10 +51,14 @@ export function CategorySlider({
                   : 'bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700',
               )}
             >
-              {iconUrl ? (
+              {iconUrl && !failedIds.has(cat.id) ? (
                 <img
                   src={resolveImage(iconUrl)}
                   alt={cat.name}
+                  width={40}
+                  height={40}
+                  loading="lazy"
+                  onError={() => setFailedIds((prev) => new Set(prev).add(cat.id))}
                   className="w-10 h-10 object-contain"
                 />
               ) : (
@@ -62,7 +67,7 @@ export function CategorySlider({
             </div>
             <span
               className={clsx(
-                'text-[10px] font-medium text-center leading-tight max-w-[64px] transition-colors',
+                'text-caption font-medium text-center leading-tight max-w-[64px] transition-colors',
                 isActive
                   ? 'text-di-red font-semibold'
                   : 'text-neutral-600 dark:text-neutral-400',

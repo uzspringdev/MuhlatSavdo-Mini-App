@@ -67,6 +67,51 @@ export const telegram = {
     tg()?.BackButton.hide();
   },
 
+  /** Disable pull-down-to-close vertical swipe (Bot API 7.7) */
+  disableVerticalSwipes() {
+    tg()?.disableVerticalSwipes?.();
+  },
+
+  /** Re-enable pull-down-to-close vertical swipe */
+  enableVerticalSwipes() {
+    tg()?.enableVerticalSwipes?.();
+  },
+
+  /** Ask for confirmation before closing the Mini App */
+  enableClosingConfirmation() {
+    tg()?.enableClosingConfirmation();
+  },
+
+  /** Remove the closing confirmation prompt */
+  disableClosingConfirmation() {
+    tg()?.disableClosingConfirmation();
+  },
+
+  /** Native Telegram alert, falls back to a callback-driven no-op outside Telegram */
+  showAlert(message: string, callback?: () => void) {
+    const app = tg();
+    if (app?.showAlert) {
+      app.showAlert(message, callback);
+    } else {
+      callback?.();
+    }
+  },
+
+  /** Device safe-area insets reported by Telegram (Bot API 8.0), null if unavailable */
+  get safeAreaInset() {
+    return tg()?.safeAreaInset ?? null;
+  },
+
+  /** Subscribe to a native WebApp event (e.g. 'themeChanged') */
+  onEvent(eventType: string, callback: () => void) {
+    tg()?.onEvent(eventType, callback);
+  },
+
+  /** Unsubscribe from a native WebApp event */
+  offEvent(eventType: string, callback: () => void) {
+    tg()?.offEvent(eventType, callback);
+  },
+
   /** Show main action button */
   showMainButton(text: string, callback: () => void) {
     const app = tg();

@@ -2,28 +2,33 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, MessageCircle } from 'lucide-react';
 import { PageLayout } from '@/shared/ui/PageLayout';
+import { PhoneInput } from '@/shared/ui/PhoneInput';
 import { telegram } from '@/app/telegram/telegram';
 import { useLoginWithOTP, useSendOTP, useTelegramAuth } from '@/features/auth/hooks/useAuth';
+import { useT } from '@/shared/i18n';
+
+interface LocationState {
+  from?: { pathname?: string };
+}
 
 export default function LoginPage() {
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as LocationState)?.from?.pathname || '/';
 
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneDigits, setPhoneDigits] = useState('');
   const [otp, setOtp] = useState('');
 
   const sendOtpMutation = useSendOTP();
   const loginMutation = useLoginWithOTP();
+  const fullPhone = `+998${phoneDigits}`;
 
   const handleSendOTP = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (phoneNumber.length < 9) return;
-    
-    // Format: +998XXXXXXXXX
-    const fullPhone = phoneNumber.startsWith('+') ? phoneNumber : `+998${phoneNumber}`;
-    
+    if (phoneDigits.length < 9) return;
+
     sendOtpMutation.mutate(fullPhone, {
       onSuccess: () => {
         setStep('otp');
@@ -36,8 +41,6 @@ export default function LoginPage() {
     e?.preventDefault();
     if (otp.length < 4) return;
 
-    const fullPhone = phoneNumber.startsWith('+') ? phoneNumber : `+998${phoneNumber}`;
-    
     loginMutation.mutate({ phoneNumber: fullPhone, otp }, {
       onSuccess: () => {
         navigate(from, { replace: true });
@@ -56,8 +59,7 @@ export default function LoginPage() {
         },
       });
     } else {
-      // Fallback or alert if not in Telegram
-      alert('Пожалуйста, откройте приложение через Telegram бот @taklifnomachi_bot');
+      telegram.showAlert(t('login.notInTelegramAlert'));
     }
   };
 
@@ -66,16 +68,16 @@ export default function LoginPage() {
       <div className="min-h-screen flex flex-col bg-white dark:bg-neutral-950 px-6 pt-20 pb-10">
         {/* Header Icon */}
         <div className="flex flex-col items-center mb-12 text-center">
-          <div className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-di-red to-red-700 flex items-center justify-center shadow-2xl shadow-di-red/30 mb-6 rotate-3">
+          <div className="w-20 h-20 rounded-card bg-gradient-to-br from-di-red to-red-700 flex items-center justify-center shadow-2xl shadow-di-red/30 mb-6 rotate-3">
             <ShieldCheck className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-black text-neutral-900 dark:text-white tracking-tight mb-2 uppercase">
-            Вход в аккаунт
+            {t('login.title')}
           </h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium max-w-[240px]">
-            {step === 'phone' 
-              ? 'Введите ваш номер телефона для входа в Muhlat Savdo' 
-              : `Мы отправили код подтверждения на номер ${phoneNumber}`}
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 font-medium max-w-[240px]">
+            {step === 'phone'
+              ? t('login.subtitlePhone')
+              : t('login.subtitleOtp', { phone: fullPhone })}
           </p>
         </div>
 
@@ -83,31 +85,18 @@ export default function LoginPage() {
         <div className="flex-1 max-w-sm mx-auto w-full">
           {step === 'phone' ? (
             <form onSubmit={handleSendOTP} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-neutral-400 group-focus-within:text-di-red transition-colors">
-                  <span className="text-sm font-bold text-neutral-900 dark:text-white">+998</span>
-                  <div className="w-px h-4 bg-neutral-200 dark:bg-neutral-800" />
-                </div>
-                <input
-                  type="tel"
-                  placeholder="00 000 00 00"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 9))}
-                  className="w-full pl-20 pr-4 h-16 rounded-2xl bg-neutral-50 dark:bg-neutral-900 border-2 border-transparent focus:border-di-red focus:bg-white dark:focus:bg-neutral-950 transition-all outline-none text-lg font-bold tracking-wider text-neutral-900 dark:text-white"
-                  autoFocus
-                />
-              </div>
+              <PhoneInput value={phoneDigits} onChange={setPhoneDigits} size="lg" autoFocus />
 
               <button
                 type="submit"
-                disabled={phoneNumber.length < 9 || sendOtpMutation.isPending}
+                disabled={phoneDigits.length < 9 || sendOtpMutation.isPending}
                 className="w-full h-16 rounded-2xl bg-di-red text-white font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-di-red/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100"
               >
                 {sendOtpMutation.isPending ? (
                   <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    Получить код
+                    {t('login.getCode')}
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}
@@ -118,7 +107,9 @@ export default function LoginPage() {
                   <div className="w-full border-t border-neutral-100 dark:border-neutral-800" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-white dark:bg-neutral-950 text-neutral-400 font-bold uppercase tracking-widest">или</span>
+                  <span className="px-3 bg-white dark:bg-neutral-950 text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+                    {t('login.or')}
+                  </span>
                 </div>
               </div>
 
@@ -133,7 +124,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <MessageCircle className="w-5 h-5 text-[#229ED9]" />
-                    Войти через Telegram
+                    {t('login.loginWithTelegram')}
                   </>
                 )}
               </button>
@@ -161,7 +152,7 @@ export default function LoginPage() {
                   <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    Подтвердить
+                    {t('login.confirm')}
                     <ShieldCheck className="w-5 h-5" />
                   </>
                 )}
@@ -170,9 +161,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setStep('phone')}
-                className="w-full py-4 text-xs text-neutral-500 font-bold uppercase tracking-widest hover:text-di-red transition-colors"
+                className="w-full py-4 min-h-[44px] text-xs text-neutral-600 dark:text-neutral-400 font-bold uppercase tracking-widest hover:text-di-red transition-colors"
               >
-                Изменить номер
+                {t('login.changeNumber')}
               </button>
             </form>
           )}
@@ -180,8 +171,8 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-auto text-center space-y-4">
-          <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-relaxed max-w-[280px] mx-auto uppercase tracking-wider font-bold">
-            Продолжая, вы соглашаетесь с условиями оферты и политикой конфиденциальности Muhlat Savdo
+          <p className="text-caption text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-[280px] mx-auto uppercase tracking-wider font-bold">
+            {t('login.terms')}
           </p>
         </div>
       </div>

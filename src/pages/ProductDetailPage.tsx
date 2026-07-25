@@ -1,12 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, ChevronLeft, ChevronRight, Package, ChevronDown, Check } from 'lucide-react';
+import { ShoppingCart, Package, ChevronDown, Check, Heart } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { PageLayout } from '@/shared/ui/PageLayout';
+import { InstalmentCalculator } from '@/features/products/ui/InstalmentCalculator';
+import { ProductGallery } from '@/features/products/ui/ProductGallery';
+import { RelatedProducts } from '@/features/products/ui/RelatedProducts';
 import { useProductById, useProductVariantsByModel } from '@/features/products/hooks/useProducts';
 import { useCartStore } from '@/features/orders/store/cartStore';
-import { formatPrice, resolveImage, getProductPriceInfo, getMonthlyInstalmentPrice } from '@/shared/utils';
+import { useFavoritesStore } from '@/features/favorites/store/favoritesStore';
+import { formatPrice, getProductPriceInfo } from '@/shared/utils';
+import { getMonthlyPayment } from '@/shared/utils/instalment';
+import { flyToCart } from '@/shared/utils/flyToCart';
 import { telegram } from '@/app/telegram/telegram';
+import { useT, useLangStore } from '@/shared/i18n';
 import { clsx } from 'clsx';
 
 function Accordion({ title, children, defaultOpen = false }: { title: string, children: React.ReactNode, defaultOpen?: boolean }) {
@@ -48,18 +55,19 @@ function Accordion({ title, children, defaultOpen = false }: { title: string, ch
 }
 
 export default function ProductDetailPage() {
+  const t = useT();
+  const lang = useLangStore((s) => s.lang);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [currentImg, setCurrentImg] = useState(0);
   const [qty, setQty] = useState(1);
   const [instalmentIdx, setInstalmentIdx] = useState(0);
 
   // Reset per-product selections when navigating between color variants.
   // (Adjusting state during render instead of an effect — see react.dev/learn/you-might-not-need-an-effect)
+  // ProductGallery's own image-index state resets separately via `key={id}` below.
   const [prevId, setPrevId] = useState(id);
   if (id !== prevId) {
     setPrevId(id);
-    setCurrentImg(0);
     setQty(1);
     setInstalmentIdx(0);
   }
@@ -69,6 +77,8 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((s) => s.addItem);
   const items = useCartStore((s) => s.items);
   const inCart = items.some((i) => i.productId === Number(id));
+  const isFavorite = useFavoritesStore((s) => s.isFavorite(Number(id)));
+  const toggleFavorite = useFavoritesStore((s) => s.toggle);
 
   // Color variants of the same model — one entry per distinct color
   const colorVariants = useMemo(() => {
@@ -96,7 +106,9 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!product) return;
     const { finalPrice } = getProductPriceInfo(product);
-    const label = inCart ? '✓ В корзине' : `В корзину — ${formatPrice(finalPrice * qty, product.currency)}`;
+    const label = inCart
+      ? t('product.mainButtonInCart')
+      : t('product.mainButtonAdd', { price: formatPrice(finalPrice * qty, product.currency, lang) });
     const cleanup = telegram.showMainButton(label, () => {
       if (product) {
         addItem(product, qty, product.instalments?.[instalmentIdx]?.months);
@@ -108,11 +120,11 @@ export default function ProductDetailPage() {
       cleanup?.();
       telegram.hideMainButton();
     };
-  }, [product, qty, instalmentIdx, inCart, addItem, navigate]);
+  }, [product, qty, instalmentIdx, inCart, addItem, navigate, t, lang]);
 
   if (isLoading) {
     return (
-      <PageLayout title="Товар" onBack={() => navigate(-1)} noPadding>
+      <PageLayout title={t('product.loadingTitle')} onBack={() => navigate(-1)} noPadding>
         <div className="space-y-4 p-4">
           <div className="aspect-square bg-neutral-200 dark:bg-neutral-800 rounded-2xl animate-pulse" />
           <div className="h-8 bg-neutral-100 dark:bg-neutral-800 rounded-lg w-3/4 animate-pulse" />
@@ -133,75 +145,40 @@ export default function ProductDetailPage() {
 
   return (
     <PageLayout noPadding>
-      {/* ── Image carousel ── */}
-      <div className="relative bg-neutral-50 dark:bg-neutral-900">
-        <div className="aspect-square overflow-hidden">
-          {images.length > 0 ? (
-            <img
-              src={resolveImage(images[currentImg]?.url || images[currentImg]?.name)}
-              alt={product.name}
-              className="w-full h-full object-cover transition-opacity duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Package className="w-20 h-20 text-neutral-300" />
-            </div>
-          )}
-        </div>
-
-        {/* Back button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-9 h-9 rounded-xl bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
-        >
-          <ChevronLeft className="w-5 h-5 text-neutral-700 dark:text-neutral-300" />
-        </button>
-
-        {/* Image navigation */}
-        {images.length > 1 && (
+      <ProductGallery
+        key={id}
+        images={images}
+        alt={product.name}
+        onBack={!telegram.isInTelegram ? () => navigate(-1) : undefined}
+        topRightSlot={
           <>
             <button
-              onClick={() => setCurrentImg((p) => (p - 1 + images.length) % images.length)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow z-10"
+              onClick={() => {
+                toggleFavorite(product);
+                telegram.haptic.light();
+              }}
+              aria-label={isFavorite ? t('product.removeFromFavorites') : t('product.addToFavorites')}
+              className="w-11 h-11 rounded-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm flex items-center justify-center shadow-sm"
             >
-              <ChevronLeft className="w-4 h-4 text-neutral-800" />
+              <Heart
+                className={clsx('w-5 h-5', isFavorite ? 'fill-di-red text-di-red' : 'text-neutral-700 dark:text-neutral-300')}
+              />
             </button>
-            <button
-              onClick={() => setCurrentImg((p) => (p + 1) % images.length)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow z-10"
-            >
-              <ChevronRight className="w-4 h-4 text-neutral-800" />
-            </button>
-
-            {/* Dots */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentImg(i)}
-                  className={clsx(
-                    'h-1.5 rounded-full transition-all',
-                    i === currentImg ? 'w-4 bg-di-red' : 'w-1.5 bg-neutral-400/50',
-                  )}
-                />
-              ))}
-            </div>
+            {hasDiscount && (
+              <span className="bg-di-red text-white text-caption font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-di-red/30">
+                {t('product.discount', { percent: discountPercent })}
+              </span>
+            )}
           </>
-        )}
-
-        {hasDiscount && (
-          <span className="absolute top-4 right-4 bg-di-red text-white text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-di-red/30 z-10">
-            Скидка {discountPercent}%
-          </span>
-        )}
-      </div>
+        }
+      />
 
       {/* ── Product info ── */}
       <div className="px-4 pt-6 pb-32 space-y-6">
         {/* Brand + name */}
         <div className="space-y-1">
           {product.brand?.name && (
-            <p className="text-[10px] font-black text-di-red uppercase tracking-[0.2em]">
+            <p className="text-caption font-black text-di-red uppercase tracking-[0.2em]">
               {product.brand.name}
             </p>
           )}
@@ -211,30 +188,33 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Price + qty */}
-        <div className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-900 p-4 rounded-[2rem] border border-neutral-100 dark:border-neutral-800">
+        <div className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-900 p-4 rounded-card border border-neutral-100 dark:border-neutral-800">
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-black text-di-red dark:text-di-red-light tracking-tight">
-                {formatPrice(finalPrice, product.currency)}
+                {formatPrice(finalPrice, product.currency, lang)}
               </span>
               {hasDiscount && (
-                <span className="text-xs text-neutral-400 line-through font-bold">
-                  {formatPrice(originalPrice, product.currency)}
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 line-through font-bold">
+                  {formatPrice(originalPrice, product.currency, lang)}
                 </span>
               )}
             </div>
             {product.instalments?.[instalmentIdx] && (
-              <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-1">
-                {formatPrice(getMonthlyInstalmentPrice(product.instalments[instalmentIdx]), product.currency)} / мес
+              <p className="text-caption font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mt-1">
+                {t('product.perMonth', {
+                  price: formatPrice(getMonthlyPayment(product.instalments[instalmentIdx]), product.currency, lang),
+                })}
               </p>
             )}
           </div>
 
           {/* Qty selector */}
-          <div className="flex items-center gap-2 bg-white dark:bg-neutral-800 rounded-2xl p-1 shadow-sm border border-neutral-100 dark:border-neutral-700">
+          <div className="flex items-center gap-2 bg-white dark:bg-neutral-800 rounded-el p-1 shadow-sm border border-neutral-100 dark:border-neutral-700">
             <button
               onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="w-8 h-8 rounded-xl bg-neutral-50 dark:bg-neutral-700 flex items-center justify-center font-bold text-neutral-700 dark:text-neutral-200 active:scale-90 transition-transform"
+              aria-label="−1"
+              className="w-11 h-11 rounded-el bg-neutral-50 dark:bg-neutral-700 flex items-center justify-center font-bold text-neutral-700 dark:text-neutral-200 active:scale-90 transition-transform"
             >
               −
             </button>
@@ -243,7 +223,8 @@ export default function ProductDetailPage() {
             </span>
             <button
               onClick={() => setQty((q) => Math.min(product.quantity, q + 1))}
-              className="w-8 h-8 rounded-xl bg-di-red flex items-center justify-center font-bold text-white shadow-md shadow-di-red/20 active:scale-90 transition-transform"
+              aria-label="+1"
+              className="w-11 h-11 rounded-el bg-di-red flex items-center justify-center font-bold text-white shadow-md shadow-di-red/20 active:scale-90 transition-transform"
             >
               +
             </button>
@@ -260,7 +241,7 @@ export default function ProductDetailPage() {
                 style={{ backgroundColor: product.color.heh || '#ccc' }}
               />
               <div className="min-w-0">
-                <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">Цвет</p>
+                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">{t('product.color')}</p>
                 <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200 truncate">{product.color.name}</p>
               </div>
             </div>
@@ -270,8 +251,8 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
             <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <div className="min-w-0">
-              <p className="text-[10px] text-emerald-700/70 dark:text-emerald-400/70 font-bold uppercase tracking-widest">Склад</p>
-              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">{product.quantity} шт.</p>
+              <p className="text-caption text-emerald-700/70 dark:text-emerald-400/70 font-bold uppercase tracking-widest">{t('product.stock')}</p>
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">{t('product.stockCount', { count: product.quantity })}</p>
             </div>
           </div>
         </div>
@@ -279,8 +260,8 @@ export default function ProductDetailPage() {
         {/* Color variant switcher */}
         {colorVariants.length > 1 && (
           <div className="space-y-2">
-            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
-              Выберите цвет
+            <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+              {t('product.selectColor')}
             </p>
             <div className="flex flex-wrap gap-3">
               {colorVariants.map((variant) => {
@@ -296,7 +277,7 @@ export default function ProductDetailPage() {
                     }}
                     aria-label={variant.color!.name}
                     className={clsx(
-                      'relative w-10 h-10 rounded-full flex items-center justify-center transition-transform active:scale-90',
+                      'relative w-11 h-11 rounded-full flex items-center justify-center transition-transform active:scale-90',
                       isActive
                         ? 'ring-2 ring-di-red ring-offset-2 ring-offset-white dark:ring-offset-neutral-950'
                         : '',
@@ -322,40 +303,22 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Instalment plans */}
+        {/* Instalment calculator */}
         {product.instalments && product.instalments.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
-              Рассрочка
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {product.instalments.map((plan, i) => (
-                <button
-                  key={plan.months}
-                  onClick={() => setInstalmentIdx(i)}
-                  className={clsx(
-                    'flex-1 min-w-[90px] px-3 py-2.5 rounded-2xl border text-center transition-colors',
-                    // Amber, not red — rassrochka is a different kind of signal than a discount
-                    i === instalmentIdx
-                      ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400'
-                      : 'bg-neutral-50 dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400',
-                  )}
-                >
-                  <p className="text-xs font-black">{plan.months} мес</p>
-                  <p className="text-[10px] font-bold mt-0.5">
-                    {formatPrice(getMonthlyInstalmentPrice(plan), product.currency)}/мес
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
+          <InstalmentCalculator
+            instalments={product.instalments}
+            selectedIndex={instalmentIdx}
+            onSelect={setInstalmentIdx}
+            basePrice={product.basePrice}
+            currency={product.currency}
+          />
         )}
 
         {/* Collapsible Sections (Accordions) */}
-        <div className="bg-neutral-50 dark:bg-neutral-900 px-4 rounded-[2rem] border border-neutral-100 dark:border-neutral-800">
+        <div className="bg-neutral-50 dark:bg-neutral-900 px-4 rounded-card border border-neutral-100 dark:border-neutral-800">
           {/* Description */}
           {product.description && (
-            <Accordion title="ОПИСАНИЕ" defaultOpen>
+            <Accordion title={t('product.description').toUpperCase()} defaultOpen>
               <div
                 className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed prose prose-sm dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
@@ -365,11 +328,11 @@ export default function ProductDetailPage() {
 
           {/* Attributes */}
           {product.attributes && product.attributes.length > 0 && (
-            <Accordion title="ХАРАКТЕРИСТИКИ">
+            <Accordion title={t('product.attributes').toUpperCase()}>
               <div className="space-y-3">
                 {product.attributes.map((attr, i) => (
                   <div key={i} className="flex justify-between items-end gap-4 text-xs">
-                    <span className="text-neutral-400 font-medium uppercase tracking-wider flex-shrink-0">
+                    <span className="text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider flex-shrink-0">
                       {attr.name}
                     </span>
                     <div className="flex-1 border-b border-dotted border-neutral-200 dark:border-neutral-800 mb-1" />
@@ -386,22 +349,29 @@ export default function ProductDetailPage() {
         {/* Add to cart (fallback for non-Telegram) */}
         {!telegram.isInTelegram && (
           <button
-            onClick={() => {
+            onClick={(e) => {
               addItem(product, qty, product.instalments?.[instalmentIdx]?.months);
+              flyToCart(e.currentTarget);
               telegram.haptic.success();
             }}
             className={clsx(
-              'w-full h-16 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-3 shadow-xl active:scale-[0.98]',
+              'w-full h-16 rounded-el font-black text-sm uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-3 shadow-xl active:scale-[0.98]',
               inCart
                 ? 'bg-emerald-500 text-white shadow-emerald-500/30'
                 : 'bg-di-red text-white shadow-di-red/30',
             )}
           >
             <ShoppingCart className="w-5 h-5" />
-            {inCart ? '✓ В КОРЗИНЕ' : 'ДОБАВИТЬ В КОРЗИНU'}
+            {inCart ? `✓ ${t('product.inCart')}` : t('product.addToCart')}
           </button>
         )}
       </div>
+
+      <RelatedProducts
+        currentProductId={product.id}
+        categoryId={product.category?.id}
+        brandId={product.brand?.id}
+      />
     </PageLayout>
   );
 }
