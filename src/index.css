@@ -170,11 +170,18 @@ a, button {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-/* ─── Focus visibility (keyboard navigation) ─────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--color-di-red);
-  outline-offset: 2px;
-  border-radius: 4px;
+/* ─── Focus visibility (keyboard navigation) ──────────────────────────────────
+   Scoped to Tailwind's own `base` layer (not left bare) so a component's own
+   `outline-none` — living in the higher-priority `utilities` layer — can still
+   win and replace this with its own border/ring focus treatment. Left bare,
+   this rule would beat `outline-none` regardless of specificity, stacking a
+   second outline on top of every input's own focus style. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-di-red);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 /* ─── Dual-thumb price range slider (FilterSheet) ────────────────────────────

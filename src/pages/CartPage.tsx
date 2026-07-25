@@ -284,7 +284,7 @@ export default function CartPage() {
               placeholder={t('cart.namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-el px-4 py-3 text-sm text-neutral-800 dark:text-neutral-200 placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-di-red/30 focus:border-di-red"
+              className="w-full bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-el px-4 py-3 text-sm text-neutral-800 dark:text-neutral-200 placeholder-neutral-500 dark:placeholder-neutral-400 outline-none transition-colors focus:border-di-red"
             />
             <PhoneInput
               value={phoneDigits}

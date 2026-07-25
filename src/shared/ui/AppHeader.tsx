@@ -93,7 +93,7 @@ export function AppHeader({
         )}
 
         {variant === 'search' && (
-          <div className="flex-1 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-el px-3 py-2.5 min-w-0 focus-within:ring-2 focus-within:ring-di-red/30 transition-shadow">
+          <div className="flex-1 flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 rounded-el px-3 py-2.5 min-w-0 border-2 border-transparent focus-within:border-di-red transition-colors">
             <Search className="w-4 h-4 text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
             <input
               type="search"
