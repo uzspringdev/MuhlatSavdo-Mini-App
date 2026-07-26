@@ -23,14 +23,20 @@
   --color-tg-button: var(--tg-button, #e31e24);
   --color-tg-button-text: var(--tg-button-text, #ffffff);
 
-  /* ─── Typography scale (PLAN.md B1-1) — replaces ad-hoc text-[10px] etc. ── */
-  --text-caption: 11px;
-  --text-caption--line-height: 1.4;
-  --text-body: 13px;
-  --text-body--line-height: 1.5;
-  --text-base: 15px;
+  /* ─── Typography scale (PLAN.md B1-1, revised) ───────────────────────────────
+     Overrides Tailwind's own xs/sm/base/lg/xl/2xl instead of adding parallel
+     custom names (the earlier --text-caption/--text-body tokens sat 1-2px
+     from xs/sm and were never fully adopted, leaving five near-duplicate
+     small sizes in play). `base` moves to 16px and `lg` to 18px to match the
+     body-text baseline used by Apple HIG (17pt) and Material Design (16sp)
+     instead of the denser 15/17px pair. */
+  --text-xs: 12px;
+  --text-xs--line-height: 1.4;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.5;
+  --text-base: 16px;
   --text-base--line-height: 1.5;
-  --text-lg: 17px;
+  --text-lg: 18px;
   --text-lg--line-height: 1.5;
   --text-xl: 22px;
   --text-xl--line-height: 1.3;

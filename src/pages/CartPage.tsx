@@ -208,7 +208,7 @@ export default function CartPage() {
                       <button
                         onClick={() => updateInstalment(productId, undefined)}
                         className={clsx(
-                          'flex-shrink-0 px-3 min-h-[36px] rounded-el text-caption font-bold border transition-colors',
+                          'flex-shrink-0 px-3 min-h-[36px] rounded-el text-xs font-bold border transition-colors',
                           !selectedInstalment
                             ? 'bg-di-red border-di-red text-white'
                             : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400',
@@ -221,7 +221,7 @@ export default function CartPage() {
                           key={plan.months}
                           onClick={() => updateInstalment(productId, plan.months)}
                           className={clsx(
-                            'flex-shrink-0 px-3 min-h-[36px] rounded-el text-caption font-bold border transition-colors',
+                            'flex-shrink-0 px-3 min-h-[36px] rounded-el text-xs font-bold border transition-colors',
                             selectedInstalment?.months === plan.months
                               ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400'
                               : 'bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400',

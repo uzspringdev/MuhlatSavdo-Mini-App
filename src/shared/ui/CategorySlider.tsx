@@ -67,7 +67,7 @@ export function CategorySlider({
             </div>
             <span
               className={clsx(
-                'text-caption font-medium text-center leading-tight max-w-[64px] transition-colors',
+                'text-xs font-medium text-center leading-tight max-w-[64px] transition-colors',
                 isActive
                   ? 'text-di-red font-semibold'
                   : 'text-neutral-600 dark:text-neutral-400',

@@ -84,7 +84,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
 
         {/* Discount — corner ribbon instead of a plain chip, reads as "sale" at a glance */}
         {hasDiscount && (
-          <div className="absolute -left-9 top-3 w-28 -rotate-45 bg-di-red text-white text-caption font-black text-center py-1 shadow-md shadow-black/20 z-10">
+          <div className="absolute -left-9 top-3 w-28 -rotate-45 bg-di-red text-white text-xs font-black text-center py-1 shadow-md shadow-black/20 z-10">
             -{discountPercent}%
           </div>
         )}
@@ -92,7 +92,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
         {/* Hot badge — soft glow ring so it still feels distinct next to the ribbon */}
         {product.badges?.find((b) => b.displayName?.toLowerCase().includes('new')) && (
           <span className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 shadow-md shadow-emerald-500/40 ring-1 ring-white/40 z-10">
-            <Zap className="w-3 h-3" /> NEW
+            <Zap className="w-4 h-4" /> NEW
           </span>
         )}
 
@@ -143,7 +143,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
                 price: formatPrice(getMonthlyPayment(cheapestInstalment), product.currency, lang),
               })}
             </div>
-            <p className="text-caption text-neutral-500 dark:text-neutral-400">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {t('product.instalmentSummary', {
                 months: cheapestInstalment.months,
                 total: formatPrice(cheapestInstalment.price, product.currency, lang),

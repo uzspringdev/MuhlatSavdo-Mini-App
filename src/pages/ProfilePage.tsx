@@ -193,7 +193,7 @@ export default function ProfilePage() {
                   {t('profile.sendFromTelegram')}
                 </button>
               </div>
-              <p className="text-caption text-neutral-500 dark:text-neutral-400 text-center px-2">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 text-center px-2">
                 {t('profile.phoneHint')}
               </p>
             </div>

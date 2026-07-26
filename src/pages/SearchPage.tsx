@@ -77,12 +77,12 @@ export default function SearchPage() {
             {history.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
                     {t('search.recentSearches')}
                   </p>
                   <button
                     onClick={clearHistory}
-                    className="text-caption font-bold text-di-red min-h-[36px] px-1"
+                    className="text-xs font-bold text-di-red min-h-[36px] px-1"
                   >
                     {t('search.clearHistory')}
                   </button>
@@ -102,9 +102,9 @@ export default function SearchPage() {
                       <button
                         onClick={() => removeHistory(q)}
                         aria-label={t('common.clear')}
-                        className="w-8 h-8 flex items-center justify-center text-neutral-400 dark:text-neutral-500"
+                        className="w-11 h-11 flex items-center justify-center text-neutral-400 dark:text-neutral-500"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
@@ -113,7 +113,7 @@ export default function SearchPage() {
             )}
 
             <div className="space-y-2">
-              <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
                 {t('search.popularSearches')}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -136,7 +136,7 @@ export default function SearchPage() {
             <EmptyState variant="search" description={t('search.noResultsFor', { query: debouncedQuery })} />
             {rootCategories.length > 0 && (
               <div className="space-y-2 px-2">
-                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest text-center">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest text-center">
                   {t('search.browseCategories')}
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">

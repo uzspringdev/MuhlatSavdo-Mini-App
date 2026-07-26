@@ -103,7 +103,7 @@ export function FilterSheet({
           <div className="px-4 py-4 space-y-6">
             {/* Price range */}
             <div className="space-y-3">
-              <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
                 {t('filter.priceRange')}
               </p>
               <div className="flex items-center justify-between text-sm font-bold text-neutral-800 dark:text-neutral-200">
@@ -145,7 +145,7 @@ export function FilterSheet({
             {/* Brand */}
             {!!brands?.length && (
               <div className="space-y-2">
-                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
                   {t('filter.brand')}
                 </p>
                 <div className="space-y-1">
@@ -171,7 +171,7 @@ export function FilterSheet({
                 single-select control, not a checkbox list. */}
             {!!colors?.length && (
               <div className="space-y-2">
-                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
                   {t('filter.color')}
                 </p>
                 <div className="flex flex-wrap gap-3">

@@ -62,7 +62,7 @@ export function BottomNavbar() {
                   {isCart && totalItems > 0 && (
                     <span
                       key={totalItems}
-                      className="absolute top-0.5 right-1.5 bg-di-red text-white text-caption font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 leading-none animate-badge-pop"
+                      className="absolute top-0.5 right-1.5 bg-di-red text-white text-xs font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 leading-none animate-badge-pop"
                     >
                       {totalItems > 99 ? '99+' : totalItems}
                     </span>
@@ -70,7 +70,7 @@ export function BottomNavbar() {
                 </div>
                 <span
                   className={clsx(
-                    'text-caption font-medium transition-colors',
+                    'text-xs font-medium transition-colors',
                     isActive && 'font-semibold',
                   )}
                 >

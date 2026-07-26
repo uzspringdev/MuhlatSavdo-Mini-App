@@ -165,7 +165,7 @@ export default function ProductDetailPage() {
               />
             </button>
             {hasDiscount && (
-              <span className="bg-di-red text-white text-caption font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-di-red/30">
+              <span className="bg-di-red text-white text-xs font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-lg shadow-di-red/30">
                 {t('product.discount', { percent: discountPercent })}
               </span>
             )}
@@ -178,7 +178,7 @@ export default function ProductDetailPage() {
         {/* Brand + name */}
         <div className="space-y-1">
           {product.brand?.name && (
-            <p className="text-caption font-black text-di-red uppercase tracking-[0.2em]">
+            <p className="text-xs font-black text-di-red uppercase tracking-[0.2em]">
               {product.brand.name}
             </p>
           )}
@@ -201,7 +201,7 @@ export default function ProductDetailPage() {
               )}
             </div>
             {product.instalments?.[instalmentIdx] && (
-              <p className="text-caption font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mt-1">
+              <p className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mt-1">
                 {t('product.perMonth', {
                   price: formatPrice(getMonthlyPayment(product.instalments[instalmentIdx]), product.currency, lang),
                 })}
@@ -241,7 +241,7 @@ export default function ProductDetailPage() {
                 style={{ backgroundColor: product.color.heh || '#ccc' }}
               />
               <div className="min-w-0">
-                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">{t('product.color')}</p>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">{t('product.color')}</p>
                 <p className="text-xs font-bold text-neutral-800 dark:text-neutral-200 truncate">{product.color.name}</p>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
             <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <div className="min-w-0">
-              <p className="text-caption text-emerald-700/70 dark:text-emerald-400/70 font-bold uppercase tracking-widest">{t('product.stock')}</p>
+              <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 font-bold uppercase tracking-widest">{t('product.stock')}</p>
               <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 truncate">{t('product.stockCount', { count: product.quantity })}</p>
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function ProductDetailPage() {
         {/* Color variant switcher */}
         {colorVariants.length > 1 && (
           <div className="space-y-2">
-            <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
               {t('product.selectColor')}
             </p>
             <div className="flex flex-wrap gap-3">

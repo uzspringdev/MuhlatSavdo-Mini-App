@@ -171,7 +171,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-auto text-center space-y-4">
-          <p className="text-caption text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-[280px] mx-auto uppercase tracking-wider font-bold">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-[280px] mx-auto uppercase tracking-wider font-bold">
             {t('login.terms')}
           </p>
         </div>

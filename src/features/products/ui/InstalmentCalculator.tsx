@@ -36,7 +36,7 @@ export function InstalmentCalculator({
 
   return (
     <div className="space-y-3">
-      <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
         {t('product.instalment')}
       </p>
 

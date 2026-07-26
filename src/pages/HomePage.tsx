@@ -149,7 +149,7 @@ export default function HomePage() {
             ].map(({ icon: Icon, textKey }) => (
               <div key={textKey} className="flex flex-col items-center text-center gap-1.5 px-1">
                 <Icon className="w-5 h-5 text-di-red dark:text-di-red-light" />
-                <p className="text-caption text-neutral-600 dark:text-neutral-400 font-medium leading-tight">
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 font-medium leading-tight">
                   {t(textKey)}
                 </p>
               </div>
@@ -168,9 +168,9 @@ export default function HomePage() {
             </div>
             <Link
               to="/catalog"
-              className="group flex items-center gap-1.5 min-h-[44px] text-caption text-neutral-600 dark:text-neutral-400 font-black uppercase tracking-widest hover:text-di-red transition-colors"
+              className="group flex items-center gap-1.5 min-h-[44px] text-xs text-neutral-600 dark:text-neutral-400 font-black uppercase tracking-widest hover:text-di-red transition-colors"
             >
-              {t('home.catalogLink')} <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+              {t('home.catalogLink')} <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -224,7 +224,7 @@ export default function HomePage() {
                 {isFetchingNextPage ? (
                   <>
                     <Loader2 className="w-8 h-8 animate-spin text-di-red" />
-                    <span className="text-caption font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
                       {t('common.loading')}
                     </span>
                   </>
@@ -233,7 +233,7 @@ export default function HomePage() {
                 ) : (
                   <div className="flex flex-col items-center gap-2 py-4">
                     <div className="h-px w-20 bg-neutral-200 dark:bg-neutral-800" />
-                    <p className="text-caption text-neutral-500 dark:text-neutral-400 font-black uppercase tracking-[0.2em]">
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 font-black uppercase tracking-[0.2em]">
                       {t('home.allLoaded')}
                     </p>
                   </div>

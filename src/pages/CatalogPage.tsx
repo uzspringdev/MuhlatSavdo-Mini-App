@@ -180,9 +180,9 @@ export default function CatalogPage() {
             aria-label={t('filter.title')}
             className="relative w-11 h-11 rounded-el bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300"
           >
-            <SlidersHorizontal className="w-4.5 h-4.5" />
+            <SlidersHorizontal className="w-5 h-5" />
             {activeFilterCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-di-red text-white text-[9px] font-bold flex items-center justify-center leading-none">
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-di-red text-white text-xs font-bold flex items-center justify-center leading-none">
                 {activeFilterCount}
               </span>
             )}
@@ -200,7 +200,7 @@ export default function CatalogPage() {
         {/* Breadcrumb — tells the user where they are once the chip row alone
             no longer does (e.g. deep inside a subcategory). */}
         {activeCategory && (
-          <p className="px-4 pb-2 text-caption text-neutral-500 dark:text-neutral-400 truncate">
+          <p className="px-4 pb-2 text-xs text-neutral-500 dark:text-neutral-400 truncate">
             {rootCategory && rootCategory.id !== activeCategory.id
               ? `${rootCategory.name} › ${activeCategory.name}`
               : activeCategory.name}
@@ -244,7 +244,7 @@ export default function CatalogPage() {
       <div className="px-4 pt-4 pb-12 space-y-4">
         {/* Results count */}
         {!isLoading && products.length > 0 && (
-          <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest">
             {t('catalog.found', { count: totalProducts })}
           </p>
         )}
@@ -267,14 +267,14 @@ export default function CatalogPage() {
             {/* Load More Sentinel */}
             <div ref={observerRef} className="py-8 flex justify-center">
               {isFetchingNextPage ? (
-                <div className="flex items-center gap-2 text-di-red font-bold uppercase tracking-widest text-caption">
+                <div className="flex items-center gap-2 text-di-red font-bold uppercase tracking-widest text-xs">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   {t('common.loading')}
                 </div>
               ) : hasNextPage ? (
                 <div className="h-10 w-full" />
               ) : (
-                <p className="text-caption text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest italic py-4">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-bold uppercase tracking-widest italic py-4">
                   {t('catalog.noMore')}
                 </p>
               )}
